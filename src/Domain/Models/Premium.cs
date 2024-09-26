@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Models;
 
-public class Premium
+public class Premium : BaseEntity
 {
 
-    public int Id { get; set; }  
+    //public int Id { get; set; }  
 
     public string Name { get; set; } = string.Empty;
 

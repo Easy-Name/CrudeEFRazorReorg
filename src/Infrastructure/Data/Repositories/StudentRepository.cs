@@ -1,11 +1,9 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Infrastructure.Data.Repositories
 {
-    public class StudentRepository : IStudentRepository //essa é a classe concreta (onde de fato as coisas acontecem, onde existem os métodos e onde os comportamentos são executados)
+    /*public class StudentRepository : IStudentRepository //essa é a classe concreta (onde de fato as coisas acontecem, onde existem os métodos e onde os comportamentos são executados)
     {
 
         private readonly ApplicationDbContext _context;
@@ -35,6 +33,28 @@ namespace Infrastructure.Data.Repositories
         {
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public void Update(Student student)
+        {
+            _context.Attach(student).State = EntityState.Modified;
+        }
+
+        public bool StudentExists(int id)
+        {
+            return _context.Students.Any(e => e.Id == id);
+        }
+    }*/
+
+    public class StudentRepository : BaseRepository<Student>, IStudentRepository //essa é a classe concreta (onde de fato as coisas acontecem, onde existem os métodos e onde os comportamentos são executados)
+    {
+        public StudentRepository(ApplicationDbContext context) : base(context)
+        {
         }
     }
 }

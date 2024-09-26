@@ -3,10 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Models;
 
-public class Student
+public class Student : BaseEntity
 {
 
-    public int Id { get; set; }  //Key indicates that this ID is going to be a primary Key
+
+    //public int Id { get; set; }  //Key indicates that this ID is going to be a primary Key
 
     public string Name { get; set; } = string.Empty;
 

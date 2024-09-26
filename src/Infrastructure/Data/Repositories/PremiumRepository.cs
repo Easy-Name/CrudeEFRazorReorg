@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Data.Repositories
 {
-    public class PremiumRepository : IPremiumRepository
+    /*public class PremiumRepository : IPremiumRepository
     {
         private readonly ApplicationDbContext _context;
 
@@ -56,5 +56,13 @@ namespace Infrastructure.Data.Repositories
             _context.Attach(premium).State = EntityState.Modified;
         }
 
+    }*/
+    public class PremiumRepository : BaseRepository<Premium>, IPremiumRepository
+    {
+        private readonly ApplicationDbContext _context;
+
+        public PremiumRepository(ApplicationDbContext context) : base(context) 
+        {
+        }
     }
 }
