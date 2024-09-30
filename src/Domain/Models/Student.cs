@@ -6,9 +6,6 @@ namespace Domain.Models;
 public class Student : BaseEntity
 {
 
-
-    //public int Id { get; set; }  //Key indicates that this ID is going to be a primary Key
-
     public string Name { get; set; } = string.Empty;
 
     public string Email { get; set; } = string.Empty;

@@ -6,8 +6,6 @@ namespace Domain.Models;
 public class Premium : BaseEntity
 {
 
-    //public int Id { get; set; }  
-
     public string Name { get; set; } = string.Empty;
 
     public DateTime StartDate { get; set; }

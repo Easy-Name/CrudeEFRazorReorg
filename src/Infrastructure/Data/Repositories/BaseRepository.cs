@@ -10,7 +10,7 @@ namespace Infrastructure.Data.Repositories
 
         protected readonly ApplicationDbContext _context;
         
-        public DbSet<TEntity> entity => _context.Set<TEntity>();
+        public DbSet<TEntity> entity => _context.Set<TEntity>(); //abertura de conexão com a tabela do banco de dados
 
         protected BaseRepository(ApplicationDbContext context)
         {
@@ -18,39 +18,39 @@ namespace Infrastructure.Data.Repositories
         }
 
 
-        public async Task<List<TEntity>> OnGetAsync()
+        public virtual async Task<List<TEntity>> OnGetAsync()
         {
             return await entity.ToListAsync();
         }
 
-        public async Task<TEntity> GetByIdAsync(int id)
+        public virtual async Task<TEntity> GetByIdAsync(int id)
         { 
            return await entity.FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task DeleteAsync(TEntity entity)
+        public virtual async Task DeleteAsync(TEntity entity)
         {
             _context.Remove(entity);
             await _context.SaveChangesAsync();
         }
 
-        public async Task CreateAsync(TEntity entity)
+        public virtual async Task CreateAsync(TEntity entity)
         {
             _context.Add(entity);
             await _context.SaveChangesAsync();
         }
 
-        public async Task SaveChangesAsync()
+        public virtual async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
 
-        public void Update(TEntity entity)
+        public virtual void Update(TEntity entity)
         {
             _context.Attach(entity).State = EntityState.Modified;
         }
 
-        public bool Exists(int id)
+        public virtual bool Exists(int id)
         {
             return _context.Students.Any(e => e.Id == id);
         }
