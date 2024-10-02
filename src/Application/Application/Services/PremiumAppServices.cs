@@ -8,17 +8,38 @@ namespace Application
     public class PremiumAppServices : IPremiumAppServices
     {
         private readonly IPremiumRepository _premiumRepository;
+        private readonly IStudentRepository _studentRepository; //IS THIS POSSIBLE? SHOULD I HAVE ONLY PREMIUM RELATED STUFF HERE?
 
-        public PremiumAppServices(IPremiumRepository premiumRepository)
+        public PremiumAppServices(IPremiumRepository premiumRepository, IStudentRepository studentRepository)
         {
             _premiumRepository = premiumRepository;
+            _studentRepository = studentRepository;
         }
 
         public async Task CreateAsync(Premium premium)
         {
             //TODO Criar validações para todos os métods que vou criar. Também criar as interfaces
-            bool validation = ValidateName(premium);
-            await _premiumRepository.CreateAsync(premium);
+
+            bool namevalidation = ValidateName(premium);
+
+            try
+            {
+                bool validateID = ValidateID(premium.StudentId);
+            }
+            catch 
+            {
+                throw;   
+            }
+
+
+            if (namevalidation)
+            {
+                await _premiumRepository.CreateAsync(premium);
+            }
+            else if (!namevalidation)
+            {
+                throw new Exception("Name shorter than 5 characters");
+            }
         }
 
         public virtual async Task<List<Premium>> OnGetAsync()
@@ -59,18 +80,34 @@ namespace Application
 
         public bool ValidateID(int id)
         {
-            return id > 0;
+            var valid1 = _studentRepository.Exists(id);
+            var valid2 = id > 0;
+
+            if (valid1 && valid2)
+            {
+                return true;
+            }
+            else if (!valid1)
+            {
+                throw new Exception("Student does not exist");
+            }
+            else
+            {
+                throw new Exception("Invalid student");
+            }
         }
 
-        private int NameLenght = 6;
+        private int NameLenght = 5;
 
         public bool ValidateName(Premium Premium)
         {
             return Premium.Name.Length > NameLenght;
         }
 
-
-
+        public virtual bool ExistsEmail(string email)
+        {
+            return _premiumRepository.ExistsEmail(email);
+        }
 
 
 

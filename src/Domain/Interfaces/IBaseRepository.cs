@@ -19,6 +19,8 @@ namespace Domain.Interfaces
         Task SaveChangesAsync();
 
         bool Exists(int id);
+
+        bool ExistsEmail(string email);
     }
 }
 

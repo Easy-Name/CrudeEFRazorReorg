@@ -19,15 +19,15 @@ namespace Application.Services
 
         public async Task CreateAsync(Student student)
         {
-            //TODO Criar validações para todos os métods que vou criar. Também criar as interfaces
             bool namevalidation = ValidateName(student);
             bool existEmail = ExistsEmail(student.Email);
+
             if (namevalidation && !existEmail)
             {
                 await _studentRepository.CreateAsync(student);
                 //return true;
             }
-            else if (existEmail) 
+            else if (existEmail)
             {
                 throw new Exception("E-Mail already in use");
             }
@@ -35,7 +35,6 @@ namespace Application.Services
             {
                 throw new Exception("Name shorter than 5 characters");
             }
-            //await _studentRepository.CreateAsync(student);
         }
 
         public virtual async Task<List<Student>> OnGetAsync()
@@ -49,13 +48,12 @@ namespace Application.Services
             bool validation = ValidateID(id);
             if (validation)
             {
-
                 try
                 {
                     return await _studentRepository.GetByIdAsync(id);
                 }
-                catch (Exception) 
-                { 
+                catch (Exception)
+                {
                     throw;
                 }
             }
@@ -63,9 +61,8 @@ namespace Application.Services
             {
                 throw new Exception("id must be above 0");
             }
-            
-        }
 
+        }
         public virtual async Task DeleteAsync(Student student)
         {
             bool validation = Exists(student.Id);
@@ -80,8 +77,22 @@ namespace Application.Services
 
         public virtual void Update(Student student)
         {
-            bool validation = ValidateName(student);
-            _studentRepository.Update(student);
+            bool namevalidation = ValidateName(student);
+            bool existEmail = ExistsEmail(student.Email);
+
+            if (namevalidation && !existEmail)
+            {
+                 _studentRepository.Update(student);
+                //return true;
+            }
+            else if (existEmail)
+            {
+                throw new Exception("E-Mail already in use");
+            }
+            else if (!namevalidation)
+            {
+                throw new Exception("Name shorter than 5 characters");
+            }
         }
 
         public virtual bool Exists(int id)
@@ -90,23 +101,20 @@ namespace Application.Services
             return _studentRepository.Exists(id);
         }
 
-        public bool ValidateID(int id) 
+        public bool ValidateID(int id)
         {
             return id > 0;
         }
 
         private int NameLenght = 6;
 
-        public bool ValidateName(Student student) 
+        public bool ValidateName(Student student)
         {
             return student.Name.Length > NameLenght;
         }
         public virtual bool ExistsEmail(string email)
         {
             return _studentRepository.ExistsEmail(email);
-
-            //if (validation) { return validation; } else { throw new Exception("E-Mail already in use"); }
-
         }
     }
 }

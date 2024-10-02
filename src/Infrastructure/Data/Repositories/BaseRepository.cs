@@ -55,7 +55,10 @@ namespace Infrastructure.Data.Repositories
             return _context.Students.Any(e => e.Id == id);
         }
 
-
+        public virtual bool ExistsEmail(string email)
+        {
+            return _context.Students.Any(e => e.Email == email);
+        }
 
     }
 }

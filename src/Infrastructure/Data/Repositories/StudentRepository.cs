@@ -9,9 +9,9 @@ namespace Infrastructure.Data.Repositories
         {
         }
 
-        public virtual bool ExistsEmail(string email)
+        /*public virtual bool ExistsEmail(string email)
         {
             return _context.Students.Any(e => e.Email == email);
-        }
+        }*/
     }
 }
