@@ -18,7 +18,7 @@ namespace Infrastructure.Data.Repositories
 
         }
 
-        public override async Task CreateAsync(Premium entity)
+        /*public override async Task CreateAsync(Premium entity)
         {
             var e = await GetByIdAsync(entity.Id);
             if (e == null)
@@ -26,7 +26,7 @@ namespace Infrastructure.Data.Repositories
                 _context.Add(entity);
                 await _context.SaveChangesAsync();
             }
-        }
+        }*/
     }
 
 

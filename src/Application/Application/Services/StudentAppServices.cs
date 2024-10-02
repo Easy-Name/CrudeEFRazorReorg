@@ -1,7 +1,9 @@
 ﻿using Application.ServicesInterfaces;
 using Domain.Interfaces;
 using Domain.Models;
-
+using Microsoft.AspNetCore.Mvc;
+//using Microsoft.AspNetCore.Mvc.RazorPages;
+//using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Application.Services
 {
@@ -18,14 +20,20 @@ namespace Application.Services
         public async Task CreateAsync(Student student)
         {
             //TODO Criar validações para todos os métods que vou criar. Também criar as interfaces
-            bool validation = ValidateName(student);
-            if (validation)
+            bool namevalidation = ValidateName(student);
+            bool existEmail = ExistsEmail(student.Email);
+            if (namevalidation && !existEmail)
             {
                 await _studentRepository.CreateAsync(student);
+                //return true;
             }
-            else 
+            else if (existEmail) 
             {
-                throw new Exception();
+                throw new Exception("E-Mail already in use");
+            }
+            else if (!namevalidation)
+            {
+                throw new Exception("Name shorter than 5 characters");
             }
             //await _studentRepository.CreateAsync(student);
         }
@@ -39,7 +47,23 @@ namespace Application.Services
         public virtual async Task<Student> GetByIdAsync(int id)
         {
             bool validation = ValidateID(id);
-            return await _studentRepository.GetByIdAsync(id);
+            if (validation)
+            {
+
+                try
+                {
+                    return await _studentRepository.GetByIdAsync(id);
+                }
+                catch (Exception) 
+                { 
+                    throw;
+                }
+            }
+            else
+            {
+                throw new Exception("id must be above 0");
+            }
+            
         }
 
         public virtual async Task DeleteAsync(Student student)
@@ -77,6 +101,12 @@ namespace Application.Services
         {
             return student.Name.Length > NameLenght;
         }
+        public virtual bool ExistsEmail(string email)
+        {
+            return _studentRepository.ExistsEmail(email);
 
+            //if (validation) { return validation; } else { throw new Exception("E-Mail already in use"); }
+
+        }
     }
 }
