@@ -1,9 +1,8 @@
-﻿using Application.ServicesInterfaces;
+﻿using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Models;
-using Infrastructure.Data.Repositories;
 
-namespace Application
+namespace Application.Services
 {
     public class PremiumAppServices : IPremiumAppServices
     {
@@ -26,9 +25,9 @@ namespace Application
             {
                 bool validateID = ValidateID(premium.StudentId);
             }
-            catch 
+            catch
             {
-                throw;   
+                throw;
             }
 
 
@@ -38,7 +37,7 @@ namespace Application
             }
             else if (!namevalidation)
             {
-                throw new Exception("Name shorter than 5 characters");
+                throw new Exception($"Name shorter than {NameLenght} characters");
             }
         }
 
@@ -50,14 +49,46 @@ namespace Application
 
         public virtual async Task<Premium> GetByIdAsync(int id)
         {
+
             bool validation = ValidateID(id);
-            return await _premiumRepository.GetByIdAsync(id);
+            if (validation)
+            {
+                try
+                {
+                    return await _premiumRepository.GetByIdAsync(id);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+            else
+            {
+                throw new Exception("id must be above 0");
+            }
         }
 
         public virtual async Task DeleteAsync(Premium premium)
         {
+
             bool validation = Exists(premium.Id);
-            await _premiumRepository.DeleteAsync(premium);
+
+            if (validation)
+            {
+                try
+                {
+                    await _premiumRepository.DeleteAsync(premium);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+            else
+            {
+                throw new Exception("Student does not exist");
+            }
+
         }
 
         public virtual async Task SaveChangesAsync()
@@ -68,9 +99,28 @@ namespace Application
 
         public virtual void Update(Premium premium)
         {
-            bool validation = ValidateName(premium);
-            _premiumRepository.Update(premium);
+            bool namevalidation = ValidateName(premium);
+
+            try
+            {
+                bool validateID = ValidateID(premium.StudentId);
+            }
+            catch
+            {
+                throw;
+            }
+
+
+            if (namevalidation)
+            {
+                _premiumRepository.Update(premium);
+            }
+            else if (!namevalidation)
+            {
+                throw new Exception($"Name shorter than {NameLenght} characters");
+            }
         }
+
 
         public virtual bool Exists(int id)
         {

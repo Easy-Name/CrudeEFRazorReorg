@@ -1,7 +1,7 @@
 ﻿using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Application.ServicesInterfaces
+namespace Application.Interfaces
 {
     public interface IStudentAppServices
     {

@@ -1,4 +1,4 @@
-﻿using Application.ServicesInterfaces;
+﻿using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +33,7 @@ namespace Application.Services
             }
             else if (!namevalidation)
             {
-                throw new Exception("Name shorter than 5 characters");
+                throw new Exception($"Name shorter than {NameLenght} characters");
             }
         }
 
@@ -66,7 +66,22 @@ namespace Application.Services
         public virtual async Task DeleteAsync(Student student)
         {
             bool validation = Exists(student.Id);
-            await _studentRepository.DeleteAsync(student);
+
+            if (validation)
+            {
+                try
+                {
+                    await _studentRepository.DeleteAsync(student);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+            else
+            {
+                throw new Exception("Student does not exist");
+            }
         }
 
         public virtual async Task SaveChangesAsync()
@@ -91,7 +106,7 @@ namespace Application.Services
             }
             else if (!namevalidation)
             {
-                throw new Exception("Name shorter than 5 characters");
+                throw new Exception($"Name shorter than {NameLenght} characters");
             }
         }
 
@@ -106,7 +121,7 @@ namespace Application.Services
             return id > 0;
         }
 
-        private int NameLenght = 6;
+        private int NameLenght = 5;
 
         public bool ValidateName(Student student)
         {

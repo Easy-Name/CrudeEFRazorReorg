@@ -1,6 +1,6 @@
 ﻿using Domain.Models;
 
-namespace Application.ServicesInterfaces
+namespace Application.Interfaces
 {
     public interface IPremiumAppServices
     {
