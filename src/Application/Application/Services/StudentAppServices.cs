@@ -2,6 +2,8 @@
 using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
+
 //using Microsoft.AspNetCore.Mvc.RazorPages;
 //using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -19,10 +21,11 @@ namespace Application.Services
 
         public async Task CreateAsync(Student student)
         {
-            bool namevalidation = ValidateName(student);
+            bool namevalidation = ValidateName(student.Name);
             bool existEmail = ExistsEmail(student.Email);
+            bool emailvalidation = ExistsEmail(student.Email);
 
-            if (namevalidation && !existEmail)
+            if (namevalidation && !existEmail && emailvalidation)
             {
                 await _studentRepository.CreateAsync(student);
                 //return true;
@@ -34,6 +37,10 @@ namespace Application.Services
             else if (!namevalidation)
             {
                 throw new Exception($"Name shorter than {NameLenght} characters");
+            }
+            else if (!emailvalidation)
+            {
+                throw new Exception($"Invalid e-mail");
             }
         }
 
@@ -92,13 +99,13 @@ namespace Application.Services
 
         public virtual void Update(Student student)
         {
-            bool namevalidation = ValidateName(student);
+            bool namevalidation = ValidateName(student.Name);
             bool existEmail = ExistsEmail(student.Email);
+            bool emailvalidation = ExistsEmail(student.Email);
 
-            if (namevalidation && !existEmail)
+            if (namevalidation && !existEmail && emailvalidation)
             {
-                 _studentRepository.Update(student);
-                //return true;
+                _studentRepository.Update(student);
             }
             else if (existEmail)
             {
@@ -107,6 +114,10 @@ namespace Application.Services
             else if (!namevalidation)
             {
                 throw new Exception($"Name shorter than {NameLenght} characters");
+            }
+            else if (!emailvalidation)
+            {
+                throw new Exception($"Invalid e-mail");
             }
         }
 
@@ -123,13 +134,30 @@ namespace Application.Services
 
         private int NameLenght = 5;
 
-        public bool ValidateName(Student student)
+        public bool ValidateName(string name)
         {
-            return student.Name.Length > NameLenght;
+            string regex = @"^(?!\s*$)[A-Za-zÀ-ÖØ-öø-ÿ'’-]+(?: [A-Za-zÀ-ÖØ-öø-ÿ'’-]+)*$";
+            if (name.Length < NameLenght)
+            {
+                throw new Exception($"Name shorter than {NameLenght} characters");
+            }
+            else if (!Regex.IsMatch(name, regex))
+            {
+                throw new Exception($"Invalid name format");
+            }
+            return true;
         }
         public virtual bool ExistsEmail(string email)
         {
             return _studentRepository.ExistsEmail(email);
+        }
+
+        public bool ValidateEmail(string email)
+        {
+            //string regex = @"^[^@\s]+@[^@\s]+\.(com|net|org|gov)$";
+            string regex = @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$";
+            return Regex.IsMatch(email, regex, RegexOptions.IgnoreCase);
+
         }
     }
 }

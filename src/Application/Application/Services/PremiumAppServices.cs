@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Models;
+using System.Text.RegularExpressions;
 
 namespace Application.Services
 {
@@ -19,11 +20,11 @@ namespace Application.Services
         {
             //TODO Criar validações para todos os métods que vou criar. Também criar as interfaces
 
-            bool namevalidation = ValidateName(premium);
+            bool namevalidation = ValidateName(premium.Name);
 
             try
             {
-                bool validateID = ValidateID(premium.StudentId);
+                bool validateID = ValidateID(premium.Id);
             }
             catch
             {
@@ -130,41 +131,38 @@ namespace Application.Services
 
         public bool ValidateID(int id)
         {
-            var valid1 = _studentRepository.Exists(id);
-            var valid2 = id > 0;
+            var valid = id > 0;
 
-            if (valid1 && valid2)
+            if (valid)
             {
                 return true;
             }
-            else if (!valid1)
+            else             
             {
-                throw new Exception("Student does not exist");
-            }
-            else
-            {
-                throw new Exception("Invalid student");
+                throw new Exception("Invalid premium");
             }
         }
 
         private int NameLenght = 5;
 
-        public bool ValidateName(Premium Premium)
+        public bool ValidateName(string name)
         {
-            return Premium.Name.Length > NameLenght;
+            string regex = @"^(?!\s*$)[A-Za-zÀ-ÖØ-öø-ÿ'’-]+(?: [A-Za-zÀ-ÖØ-öø-ÿ'’-]+)*$";
+            if (name.Length < NameLenght)
+            {
+                throw new Exception($"Name shorter than {NameLenght} characters");
+            }
+            else if (!Regex.IsMatch(name, regex))
+            {
+                throw new Exception($"Invalid name format");
+            }
+            return true;
         }
 
         public virtual bool ExistsEmail(string email)
         {
             return _premiumRepository.ExistsEmail(email);
         }
-
-
-
-
-
-
-
 
     }
 }
