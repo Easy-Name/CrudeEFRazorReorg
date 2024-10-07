@@ -52,7 +52,7 @@ namespace Infrastructure.Data.Repositories
 
         public virtual bool Exists(int id)
         {
-            return _context.Students.Any(e => e.Id == id);
+            return entity.Any(e => e.Id == id);
         }
 
         public virtual bool ExistsEmail(string email)

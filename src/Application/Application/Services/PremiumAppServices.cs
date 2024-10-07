@@ -1,6 +1,8 @@
 ﻿using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Models;
+using Infrastructure.Data.Repositories;
+using NToastNotify;
 using System.Text.RegularExpressions;
 
 namespace Application.Services
@@ -8,37 +10,26 @@ namespace Application.Services
     public class PremiumAppServices : IPremiumAppServices
     {
         private readonly IPremiumRepository _premiumRepository;
-        private readonly IStudentRepository _studentRepository; //IS THIS POSSIBLE? SHOULD I HAVE ONLY PREMIUM RELATED STUFF HERE?
+        private readonly IToastNotification _toastNotification; //<------------------
 
-        public PremiumAppServices(IPremiumRepository premiumRepository, IStudentRepository studentRepository)
+        public PremiumAppServices(IPremiumRepository premiumRepository, IToastNotification toastNotification)
         {
             _premiumRepository = premiumRepository;
-            _studentRepository = studentRepository;
+            _toastNotification = toastNotification;
         }
 
         public async Task CreateAsync(Premium premium)
         {
-            //TODO Criar validações para todos os métods que vou criar. Também criar as interfaces
-
-            bool namevalidation = ValidateName(premium.Name);
 
             try
             {
-                bool validateID = ValidateID(premium.Id);
-            }
-            catch
-            {
-                throw;
-            }
-
-
-            if (namevalidation)
-            {
+                bool namevalidation = ValidateName(premium.Name);
+                bool idValidation = ValidateID(premium.Id);
                 await _premiumRepository.CreateAsync(premium);
             }
-            else if (!namevalidation)
+            catch (Exception ex)
             {
-                throw new Exception($"Name shorter than {NameLenght} characters");
+                _toastNotification.AddErrorToastMessage(ex.Message);
             }
         }
 
@@ -51,43 +42,29 @@ namespace Application.Services
         public virtual async Task<Premium> GetByIdAsync(int id)
         {
 
-            bool validation = ValidateID(id);
-            if (validation)
+            try
             {
-                try
-                {
-                    return await _premiumRepository.GetByIdAsync(id);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+                bool validation = ValidateID(id);
+                return await _premiumRepository.GetByIdAsync(id);
             }
-            else
+            catch (Exception ex)
             {
-                throw new Exception("id must be above 0");
+                _toastNotification.AddErrorToastMessage(ex.Message);
+                return new Premium();
             }
         }
 
         public virtual async Task DeleteAsync(Premium premium)
         {
 
-            bool validation = Exists(premium.Id);
-
-            if (validation)
+            try
             {
-                try
-                {
-                    await _premiumRepository.DeleteAsync(premium);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+                bool validation = Exists(premium.Id);
+                await _premiumRepository.DeleteAsync(premium);
             }
-            else
+            catch (Exception ex)
             {
-                throw new Exception("Student does not exist");
+                _toastNotification.AddErrorToastMessage(ex.Message);
             }
 
         }
@@ -100,25 +77,15 @@ namespace Application.Services
 
         public virtual void Update(Premium premium)
         {
-            bool namevalidation = ValidateName(premium);
-
             try
             {
-                bool validateID = ValidateID(premium.StudentId);
-            }
-            catch
-            {
-                throw;
-            }
-
-
-            if (namevalidation)
-            {
+                bool namevalidation = ValidateName(premium.Name);
+                bool idValidation = ValidateID(premium.Id);
                 _premiumRepository.Update(premium);
             }
-            else if (!namevalidation)
+            catch (Exception ex)
             {
-                throw new Exception($"Name shorter than {NameLenght} characters");
+                _toastNotification.AddErrorToastMessage(ex.Message);
             }
         }
 
@@ -126,21 +93,28 @@ namespace Application.Services
         public virtual bool Exists(int id)
         {
             bool validation = ValidateID(id);
-            return _premiumRepository.Exists(id);
+
+            if (!validation)
+            {
+                throw new Exception("Invalid ID");
+            }
+
+            if (!_premiumRepository.Exists(id))
+            {
+                throw new Exception("ID does not exist");
+            }
+
+            return true;
         }
 
         public bool ValidateID(int id)
         {
-            var valid = id > 0;
+            if (id < 0)
+            {
+                throw new Exception("Invalid ID");
+            }
 
-            if (valid)
-            {
-                return true;
-            }
-            else             
-            {
-                throw new Exception("Invalid premium");
-            }
+            return true;
         }
 
         private int NameLenght = 5;
@@ -157,11 +131,6 @@ namespace Application.Services
                 throw new Exception($"Invalid name format");
             }
             return true;
-        }
-
-        public virtual bool ExistsEmail(string email)
-        {
-            return _premiumRepository.ExistsEmail(email);
         }
 
     }

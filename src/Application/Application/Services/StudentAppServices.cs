@@ -3,6 +3,8 @@ using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using NToastNotify;
+using Infrastructure.Data.Repositories;
 
 //using Microsoft.AspNetCore.Mvc.RazorPages;
 //using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,37 +15,29 @@ namespace Application.Services
     {
 
         private readonly IStudentRepository _studentRepository;
+        private readonly IToastNotification _toastNotification; //<------------------
 
-        public StudentAppServices(IStudentRepository studentRepository)
+        public StudentAppServices(IStudentRepository studentRepository, IToastNotification toastNotification)
         {
             _studentRepository = studentRepository;
+            _toastNotification = toastNotification;
         }
 
         public async Task CreateAsync(Student student)
         {
-            bool namevalidation = ValidateName(student.Name);
-            bool existEmail = ExistsEmail(student.Email);
-            bool emailvalidation = ExistsEmail(student.Email);
-
-            if (namevalidation && !existEmail && emailvalidation)
+            try
             {
+                bool namevalidation = ValidateName(student.Name);
+                bool emailvalidation = ValidateEmail(student.Email);
+                bool idValidation = ValidateID(student.Id);
                 await _studentRepository.CreateAsync(student);
-                //return true;
             }
-            else if (existEmail)
+            catch (Exception ex)
             {
-                throw new Exception("E-Mail already in use");
+                _toastNotification.AddErrorToastMessage(ex.Message);
             }
-            else if (!namevalidation)
-            {
-                throw new Exception($"Name shorter than {NameLenght} characters");
-            }
-            else if (!emailvalidation)
-            {
-                throw new Exception($"Invalid e-mail");
-            }
-        }
 
+        }
         public virtual async Task<List<Student>> OnGetAsync()
         {
             //no validation required
@@ -52,42 +46,28 @@ namespace Application.Services
 
         public virtual async Task<Student> GetByIdAsync(int id)
         {
-            bool validation = ValidateID(id);
-            if (validation)
+            try
             {
-                try
-                {
-                    return await _studentRepository.GetByIdAsync(id);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+                bool validation = ValidateID(id);
+                return await _studentRepository.GetByIdAsync(id);
             }
-            else
+            catch (Exception ex)
             {
-                throw new Exception("id must be above 0");
+                _toastNotification.AddErrorToastMessage(ex.Message);
+                return new Student();
             }
 
         }
         public virtual async Task DeleteAsync(Student student)
         {
-            bool validation = Exists(student.Id);
-
-            if (validation)
+            try
             {
-                try
-                {
-                    await _studentRepository.DeleteAsync(student);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+                bool validation = Exists(student.Id);
+                await _studentRepository.DeleteAsync(student);
             }
-            else
+            catch (Exception ex)
             {
-                throw new Exception("Student does not exist");
+                _toastNotification.AddErrorToastMessage(ex.Message);
             }
         }
 
@@ -99,37 +79,46 @@ namespace Application.Services
 
         public virtual void Update(Student student)
         {
-            bool namevalidation = ValidateName(student.Name);
-            bool existEmail = ExistsEmail(student.Email);
-            bool emailvalidation = ExistsEmail(student.Email);
 
-            if (namevalidation && !existEmail && emailvalidation)
+            try
             {
+                bool namevalidation = ValidateName(student.Name);
+                bool emailvalidation = ValidateEmail(student.Email);
+                bool idValidation = ValidateID(student.Id);
                 _studentRepository.Update(student);
             }
-            else if (existEmail)
+            catch (Exception ex)
             {
-                throw new Exception("E-Mail already in use");
+                _toastNotification.AddErrorToastMessage(ex.Message);
             }
-            else if (!namevalidation)
-            {
-                throw new Exception($"Name shorter than {NameLenght} characters");
-            }
-            else if (!emailvalidation)
-            {
-                throw new Exception($"Invalid e-mail");
-            }
+
         }
 
         public virtual bool Exists(int id)
         {
             bool validation = ValidateID(id);
-            return _studentRepository.Exists(id);
+
+            if (!validation)
+            {
+                throw new Exception("Invalid ID");
+            }
+
+            if (!_studentRepository.Exists(id))
+            {
+                throw new Exception("ID does not exist");
+            }
+
+            return true;
         }
 
         public bool ValidateID(int id)
         {
-            return id > 0;
+            if (id < 0)
+            {
+                throw new Exception("Invalid ID");
+            }
+
+            return true;
         }
 
         private int NameLenght = 5;
@@ -156,8 +145,20 @@ namespace Application.Services
         {
             //string regex = @"^[^@\s]+@[^@\s]+\.(com|net|org|gov)$";
             string regex = @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$";
-            return Regex.IsMatch(email, regex, RegexOptions.IgnoreCase);
+            var regexOk = Regex.IsMatch(email, regex, RegexOptions.IgnoreCase);
+            var emailExist = ExistsEmail(email);
 
+            if (!regexOk) 
+            {
+                throw new Exception($"Invalid e-mail");
+            }
+
+            if(emailExist)
+            {
+                throw new Exception("E-Mail already in use");
+            }
+
+            return true;
         }
     }
 }
