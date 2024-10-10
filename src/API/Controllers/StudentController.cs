@@ -2,6 +2,7 @@
 using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Application.Dtos.Request;
 
 namespace API.Controllers
 {
@@ -26,47 +27,42 @@ namespace API.Controllers
         }
 
 
-        [HttpGet("GetById")]
-        public async Task<ActionResult<Student>> GetById(int id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Student>> GetById([FromRoute]int id)
         {
             var result = await _studentAppServices.GetByIdAsync(id);
             return Ok(result);
         }
 
         [HttpPut]
-        public ActionResult Update(Student student)
+        public ActionResult Update(int id, StudentDto studentDto)
         {
-            _studentAppServices.Update(student);
+            _studentAppServices.UpdateAsync(id, studentDto);
             return Ok();
         }
 
 
         [HttpDelete]
-        public ActionResult Delete(Student student)
+        public async Task <ActionResult> Delete(int id)
         {
-            _studentAppServices.DeleteAsync(student);
+            await _studentAppServices.DeleteAsync(id);
             return Ok();
         }
 
 
-
-        /*[HttpPost]
-        public ActionResult Create(Premium premium)
-        {
-            _premiumAppServices.CreateAsync(premium);
-            return Ok();
-        }*/
-
         [HttpPost]
-        public ActionResult Create(string Name, DateTime StartDate, DateTime EndDate, int StudentId)
+        public async Task<ActionResult> Create([FromBody] StudentDto studentDto)
         {
+            try
+            {
+                await _studentAppServices.CreateAsync(studentDto);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
-            var student = new Student();
-            student.Name = Name;
-
-
-            _studentAppServices.CreateAsync(student);
-            return Ok();
         }
 
 

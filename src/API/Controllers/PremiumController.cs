@@ -19,8 +19,8 @@ namespace API.Controllers
         }
 
         //estudar verbos HTTP - post/get/delete/put
-        //estudar IEnumerable
-        //estudar flurl
+        //estudar IEnumerable -> Ele é mais leve que as listas puras, além de ser só readonly. Não permite que eu manipule a lista, só fazer consulta
+        //estudar flurl  -> como fazer requisição e como capturar mensagem de erro
         //estudar DTO
 
         [HttpGet("GetAll")]

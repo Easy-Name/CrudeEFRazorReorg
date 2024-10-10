@@ -1,4 +1,6 @@
-﻿using Domain.Models;
+﻿using Application.Dtos;
+using Application.Dtos.Request;
+using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Interfaces
@@ -6,19 +8,17 @@ namespace Application.Interfaces
     public interface IStudentAppServices
     {
 
-        Task CreateAsync(Student student);
+        Task CreateAsync(StudentDto studentDto);
 
         Task<List<Student>> OnGetAsync();
 
-        Task<Student> GetByIdAsync(int id);
+        Task<StudentDtoResponse> GetByIdAsync(int id);
 
-        Task DeleteAsync(Student student);
+        Task DeleteAsync(int id);
 
         Task SaveChangesAsync();
 
-        void Update(Student student);
-
-        bool Exists(int id);
+		Task UpdateAsync(int id, StudentDto studentDto);
 
     }
 }

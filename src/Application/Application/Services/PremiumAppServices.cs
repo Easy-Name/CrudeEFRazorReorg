@@ -1,8 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Models;
-using Infrastructure.Data.Repositories;
-using NToastNotify;
 using System.Text.RegularExpressions;
 
 namespace Application.Services
@@ -10,12 +8,10 @@ namespace Application.Services
     public class PremiumAppServices : IPremiumAppServices
     {
         private readonly IPremiumRepository _premiumRepository;
-        private readonly IToastNotification _toastNotification; //<------------------
 
-        public PremiumAppServices(IPremiumRepository premiumRepository, IToastNotification toastNotification)
+        public PremiumAppServices(IPremiumRepository premiumRepository)
         {
             _premiumRepository = premiumRepository;
-            _toastNotification = toastNotification;
         }
 
         public async Task CreateAsync(Premium premium)
@@ -24,12 +20,12 @@ namespace Application.Services
             try
             {
                 bool namevalidation = ValidateName(premium.Name);
-                bool idValidation = ValidateID(premium.Id);
+
                 await _premiumRepository.CreateAsync(premium);
             }
-            catch (Exception ex)
+            catch 
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
+                throw;
             }
         }
 
@@ -47,10 +43,9 @@ namespace Application.Services
                 bool validation = ValidateID(id);
                 return await _premiumRepository.GetByIdAsync(id);
             }
-            catch (Exception ex)
+            catch
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
-                return new Premium();
+                throw;
             }
         }
 
@@ -62,9 +57,9 @@ namespace Application.Services
                 bool validation = Exists(premium.Id);
                 await _premiumRepository.DeleteAsync(premium);
             }
-            catch (Exception ex)
+            catch 
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
+                throw;
             }
 
         }
@@ -80,12 +75,12 @@ namespace Application.Services
             try
             {
                 bool namevalidation = ValidateName(premium.Name);
-                bool idValidation = ValidateID(premium.Id);
+
                 _premiumRepository.Update(premium);
             }
-            catch (Exception ex)
+            catch 
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
+                throw;
             }
         }
 
@@ -109,7 +104,7 @@ namespace Application.Services
 
         public bool ValidateID(int id)
         {
-            if (id < 0)
+            if (id <= 0)
             {
                 throw new Exception("Invalid ID");
             }
