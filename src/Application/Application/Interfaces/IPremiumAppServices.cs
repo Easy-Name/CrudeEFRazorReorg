@@ -14,7 +14,7 @@ namespace Application.Interfaces
 
         Task SaveChangesAsync();
 
-        void Update(Premium premium);
+        Task UpdateAsync(Premium premium);
 
         bool Exists(int id);
     }

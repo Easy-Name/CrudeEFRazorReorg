@@ -70,13 +70,14 @@ namespace Application.Services
             await _premiumRepository.SaveChangesAsync();
         }
 
-        public virtual void Update(Premium premium)
+        public virtual async Task UpdateAsync(Premium premium)
         {
             try
             {
                 bool namevalidation = ValidateName(premium.Name);
 
                 _premiumRepository.Update(premium);
+                await SaveChangesAsync();
             }
             catch 
             {

@@ -10,7 +10,7 @@ namespace Application.Dtos
 
         public DateTime EndtDate { get; set; }
 
-        public int StudentId { get; set; }
+        //public int StudentId { get; set; }
 
     }
 }

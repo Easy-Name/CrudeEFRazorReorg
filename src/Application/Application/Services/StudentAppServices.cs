@@ -38,7 +38,19 @@ namespace Application.Services
         public virtual async Task<List<Student>> OnGetAsync()
         {
             //no validation required
-            return await _studentRepository.OnGetAsync();
+            var students = await _studentRepository.OnGetAsync();
+
+            /*List<StudentDtoResponse> result = new List<StudentDtoResponse>();
+
+            foreach (var student in students) 
+            {
+            
+                result.Add(new StudentDtoResponse { Name = student.Name, Email = student.Email });
+
+            }*/
+
+
+            return students;
         }
 
         public virtual async Task<StudentDtoResponse> GetByIdAsync(int id)
@@ -84,12 +96,14 @@ namespace Application.Services
             {
                 ValidateName(studentDto.Name);
 				ValidateId(id);
-                var student = await _studentRepository.GetByIdAsync(id);
+
+                Student student = new Student();
+
+                student = await _studentRepository.GetByIdAsync(id);
 
                 if (student.Email == studentDto.Email)
                 {
                     student.Name = studentDto.Name;
-                    student.Email = studentDto.Email;
                 }
                 else 
                 {
@@ -98,6 +112,7 @@ namespace Application.Services
                     student.Email = studentDto.Email;
                 }
                 _studentRepository.Update(student);
+                await SaveChangesAsync();
             }
             catch
             {

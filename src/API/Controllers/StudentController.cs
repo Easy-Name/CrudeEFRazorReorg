@@ -35,9 +35,9 @@ namespace API.Controllers
         }
 
         [HttpPut]
-        public ActionResult Update(int id, StudentDto studentDto)
+        public async Task<ActionResult> Update(int id, StudentDto studentDto)
         {
-            _studentAppServices.UpdateAsync(id, studentDto);
+            await _studentAppServices.UpdateAsync(id, studentDto);
             return Ok();
         }
 

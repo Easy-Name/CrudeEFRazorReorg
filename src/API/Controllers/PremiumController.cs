@@ -41,7 +41,7 @@ namespace API.Controllers
         [HttpPut]
         public ActionResult Update(Premium premium)
         {
-            _premiumAppServices.Update(premium);
+            _premiumAppServices.UpdateAsync(premium);
             return Ok();
         }
 
