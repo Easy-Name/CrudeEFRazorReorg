@@ -1,4 +1,6 @@
-﻿using Application.Interfaces;
+﻿using Application.Dtos;
+using Application.Interfaces;
+using Application.Services;
 using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +25,7 @@ namespace API.Controllers
         //estudar flurl  -> como fazer requisição e como capturar mensagem de erro
         //estudar DTO
 
-        [HttpGet("GetAll")]
+        /*[HttpGet("GetAll")]
         public async Task<ActionResult<IEnumerable<Premium>>> Get()
         {
             var result = await _premiumAppServices.OnGetAsync();
@@ -60,7 +62,7 @@ namespace API.Controllers
         {
             _premiumAppServices.CreateAsync(premium);
             return Ok();
-        }*/
+        }
 
         [HttpPost]
         public ActionResult Create(string Name, DateTime StartDate, DateTime EndDate, int StudentId)
@@ -76,9 +78,78 @@ namespace API.Controllers
             return Ok();
         }
 
+        */
 
 
+        [HttpGet("GetAll")]
+        public async Task<ActionResult<IEnumerable<PremiumDtoResponse>>> Get()
+        {
+            try
+            {
+                var result = await _premiumAppServices.OnGetAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<PremiumDtoResponse>> GetById([FromRoute] int id)
+        {
+            try
+            {
+                var result = await _premiumAppServices.GetByIdAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> Update(PremiumDto premiumDto)
+        {
+            try
+            {
+                await _premiumAppServices.UpdateAsync(premiumDto);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete]
+        public async Task<ActionResult> Delete(int id)
+        {
+            try
+            {
+                await _premiumAppServices.DeleteAsync(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Create(PremiumDto premiumDto)
+        {
+            try
+            {
+                await _premiumAppServices.CreateAsync(premiumDto);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
 

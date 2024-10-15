@@ -2,13 +2,18 @@
 
 namespace Application.Dtos
 {
-    public class PremiumDtoResponse
+    public class PremiumDtoResponse 
 
     {
+        public int Id { get; set; }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
-        public string Email { get; set; }
+        public DateTime StartDate { get; set; }
+
+        public DateTime EndtDate { get; set; }
+
+        public int StudentId { get; set; }
 
     }
 }

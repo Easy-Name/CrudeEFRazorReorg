@@ -1,13 +1,15 @@
 ﻿using Application.Dtos;
-using Application.Dtos.Request;
 using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Models;
+using Infrastructure.Data.Repositories;
 using System.Text.RegularExpressions;
 
 
 namespace Application.Services
 {
+
+
     public class StudentAppServices : IStudentAppServices
     {
 
@@ -17,11 +19,6 @@ namespace Application.Services
         {
             _studentRepository = studentRepository;
         }
-
-
-
-
-
 
         public async Task CreateAsync(StudentDto studentDto)
         {
@@ -40,25 +37,19 @@ namespace Application.Services
             }
 
         }
-        public virtual async Task<List<Student>> OnGetAsync()
+        public virtual async Task<List<StudentDtoResponse>> OnGetAsync()
         {
             //no validation required
             var students = await _studentRepository.OnGetAsync();
+            var result = new List<StudentDtoResponse>();
 
-            /*List<StudentDtoResponse> result = new List<StudentDtoResponse>();
-
-            foreach (var student in students) 
+            foreach (var item in students)
             {
+                result.Add(new StudentDtoResponse { Id = item.Id, Name = item.Name, Email = item.Email });
+            }
+
+            return result;
             
-                result.Add(new StudentDtoResponse { Name = student.Name, Email = student.Email });
-
-            }*/
-
-
-
-
-
-            return students;
         }
 
         public virtual async Task<StudentDtoResponse> GetByIdAsync(int id)
@@ -68,7 +59,7 @@ namespace Application.Services
                 bool validation = ValidateId(id);
                 var student = await _studentRepository.GetByIdAsync(id);
                 //var studentDtoResponse = new StudentDtoResponse { Name = student.Name, Email = student.Email}
-                return new StudentDtoResponse { Name = student.Name, Email = student.Email };
+                return new StudentDtoResponse { Id =student.Id, Name = student.Name, Email = student.Email };
             }
             catch 
             {
@@ -97,17 +88,17 @@ namespace Application.Services
             await _studentRepository.SaveChangesAsync();
         }
 
-        public virtual async Task UpdateAsync(int id, StudentDto studentDto)
+        public virtual async Task UpdateAsync(StudentDto studentDto)
         {
 
             try
             {
                 ValidateName(studentDto.Name);
-				ValidateId(id);
+				ValidateId(studentDto.Id);
 
                 Student student = new Student();
 
-                student = await _studentRepository.GetByIdAsync(id);
+                student = await _studentRepository.GetByIdAsync(studentDto.Id);
 
                 if (student.Email == studentDto.Email)
                 {
@@ -126,7 +117,6 @@ namespace Application.Services
             {
                 throw;
             }
-
         }
 
         public bool ValidateId(int id)
@@ -178,4 +168,11 @@ namespace Application.Services
 
         }
     }
+
+    /*public class StudentAppServices : BaseAppServices<StudentDto, StudentDtoResponse, Student>, IStudentAppServices
+    {
+        public StudentAppServices(IStudentRepository studentRepository) : base(studentRepository)
+        {
+        }
+    }*/
 }

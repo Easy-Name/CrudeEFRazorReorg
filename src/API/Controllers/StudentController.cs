@@ -1,8 +1,7 @@
-﻿using Application.Interfaces;
+﻿using Application.Dtos;
+using Application.Interfaces;
 using Domain.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Application.Dtos.Request;
 
 namespace API.Controllers
 {
@@ -20,38 +19,63 @@ namespace API.Controllers
         }
 
         [HttpGet("GetAll")]
-        public async Task<ActionResult<IEnumerable<Student>>> Get()
+        public async Task<ActionResult<IEnumerable<StudentDtoResponse>>> Get()
         {
-            var result = await _studentAppServices.OnGetAsync();
-            return Ok(result);
+            try
+            {
+                var result = await _studentAppServices.OnGetAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<Student>> GetById([FromRoute]int id)
+        public async Task<ActionResult<StudentDtoResponse>> GetById([FromRoute] int id)
         {
-            var result = await _studentAppServices.GetByIdAsync(id);
-            return Ok(result);
+            try
+            {
+                var result = await _studentAppServices.GetByIdAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut]
-        public async Task<ActionResult> Update(int id, StudentDto studentDto)
+        public async Task<ActionResult> Update(StudentDto studentDto)
         {
-            await _studentAppServices.UpdateAsync(id, studentDto);
-            return Ok();
+            try
+            {
+                await _studentAppServices.UpdateAsync(studentDto);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-
 
         [HttpDelete]
-        public async Task <ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            await _studentAppServices.DeleteAsync(id);
-            return Ok();
+            try
+            {
+                await _studentAppServices.DeleteAsync(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] StudentDto studentDto)
+        public async Task<ActionResult> Create(StudentDto studentDto)
         {
             try
             {
@@ -62,7 +86,6 @@ namespace API.Controllers
             {
                 return BadRequest(ex.Message);
             }
-
         }
 
 

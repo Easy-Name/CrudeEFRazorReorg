@@ -1,16 +1,14 @@
 ﻿using Application.Dtos;
-using Application.Dtos.Request;
 using Domain.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Interfaces
 {
-    public interface IStudentAppServices
+    public interface IStudentAppServices//: IBaseAppServices<StudentDto,StudentDtoResponse, Student>
     {
 
-        Task CreateAsync(StudentDto studentDto);
+        Task CreateAsync(StudentDto dtoRequest);
 
-        Task<List<Student>> OnGetAsync();
+        Task<List<StudentDtoResponse>> OnGetAsync();
 
         Task<StudentDtoResponse> GetByIdAsync(int id);
 
@@ -18,7 +16,7 @@ namespace Application.Interfaces
 
         Task SaveChangesAsync();
 
-		Task UpdateAsync(int id, StudentDto studentDto);
+		Task UpdateAsync(StudentDto studentDto);
 
     }
 }

@@ -1,6 +1,8 @@
-﻿using Application.Interfaces;
+﻿using Application.Dtos;
+using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Models;
+using Infrastructure.Data.Repositories;
 using System.Text.RegularExpressions;
 
 namespace Application.Services
@@ -14,13 +16,14 @@ namespace Application.Services
             _premiumRepository = premiumRepository;
         }
 
-        public async Task CreateAsync(Premium premium)
+
+        public async Task CreateAsync(PremiumDto premiumDto)
         {
 
             try
             {
-                bool namevalidation = ValidateName(premium.Name);
-
+                ValidateName(premiumDto.Name);
+                var premium = new Premium { Name = premiumDto.Name, StartDate = premiumDto.StartDate, EndtDate = premiumDto.EndtDate, StudentId = premiumDto.StudentId};
                 await _premiumRepository.CreateAsync(premium);
             }
             catch 
@@ -29,19 +32,30 @@ namespace Application.Services
             }
         }
 
-        public virtual async Task<List<Premium>> OnGetAsync()
+        public virtual async Task<List<PremiumDtoResponse>> OnGetAsync()
         {
+            
+            var premium = await _premiumRepository.OnGetAsync();
+
             //no validation required
-            return await _premiumRepository.OnGetAsync();
+            var result = new List<PremiumDtoResponse>();
+
+            foreach (var item in premium)
+            {
+                result.Add(new PremiumDtoResponse { Id = item.Id, Name = item.Name, StartDate = item.StartDate, EndtDate = item.EndtDate, StudentId = item.StudentId });
+            }
+
+            return result;
         }
 
-        public virtual async Task<Premium> GetByIdAsync(int id)
+        public virtual async Task<PremiumDtoResponse> GetByIdAsync(int id)
         {
 
             try
             {
-                bool validation = ValidateID(id);
-                return await _premiumRepository.GetByIdAsync(id);
+                ValidateID(id);
+                var entity = await _premiumRepository.GetByIdAsync(id);
+                return new PremiumDtoResponse { Id = entity.Id, Name = entity.Name, StartDate = entity.StartDate, EndtDate = entity.EndtDate, StudentId = entity.StudentId };
             }
             catch
             {
@@ -49,12 +63,13 @@ namespace Application.Services
             }
         }
 
-        public virtual async Task DeleteAsync(Premium premium)
+        public virtual async Task DeleteAsync(int id)
         {
 
             try
             {
-                bool validation = Exists(premium.Id);
+                Exists(id);
+                var premium = await _premiumRepository.GetByIdAsync(id);
                 await _premiumRepository.DeleteAsync(premium);
             }
             catch 
@@ -70,14 +85,17 @@ namespace Application.Services
             await _premiumRepository.SaveChangesAsync();
         }
 
-        public virtual async Task UpdateAsync(Premium premium)
+        public virtual async Task UpdateAsync(PremiumDto premiumDto)
         {
             try
             {
-                bool namevalidation = ValidateName(premium.Name);
+                ValidateName(premiumDto.Name);
+                var originalPremium = await _premiumRepository.GetByIdAsync(premiumDto.Id);
+                var premium = new Premium { Id = originalPremium.Id, Name = originalPremium.Name, StartDate = originalPremium.StartDate, EndtDate = originalPremium.EndtDate, StudentId = originalPremium.StudentId };
 
                 _premiumRepository.Update(premium);
                 await SaveChangesAsync();
+
             }
             catch 
             {
