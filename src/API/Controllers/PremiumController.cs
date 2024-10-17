@@ -1,4 +1,5 @@
 ﻿using Application.Dtos;
+using Application.Dtos.Response;
 using Application.Interfaces;
 using Application.Services;
 using Domain.Models;
@@ -25,62 +26,6 @@ namespace API.Controllers
         //estudar flurl  -> como fazer requisição e como capturar mensagem de erro
         //estudar DTO
 
-        /*[HttpGet("GetAll")]
-        public async Task<ActionResult<IEnumerable<Premium>>> Get()
-        {
-            var result = await _premiumAppServices.OnGetAsync();
-            return Ok(result);
-        }
-
-
-        [HttpGet("GetById")]
-        public async Task<ActionResult<Premium>> GetById(int id)
-        {
-            var result = await _premiumAppServices.GetByIdAsync(id);
-            return Ok(result);
-        }
-
-        [HttpPut]
-        public ActionResult Update(Premium premium)
-        {
-            _premiumAppServices.UpdateAsync(premium);
-            return Ok();
-        }
-
-
-        [HttpDelete]
-        public ActionResult Delete(Premium premium)
-        {
-            _premiumAppServices.DeleteAsync(premium);
-            return Ok();
-        }
-
-
-
-        /*[HttpPost]
-        public ActionResult Create(Premium premium)
-        {
-            _premiumAppServices.CreateAsync(premium);
-            return Ok();
-        }
-
-        [HttpPost]
-        public ActionResult Create(string Name, DateTime StartDate, DateTime EndDate, int StudentId)
-        {
-            
-            var premium = new Premium();
-            premium.Name = Name;
-            premium.StartDate = StartDate;
-            premium.EndtDate = EndDate;
-            premium.StudentId = StudentId;
-
-            _premiumAppServices.CreateAsync(premium);
-            return Ok();
-        }
-
-        */
-
-
         [HttpGet("GetAll")]
         public async Task<ActionResult<IEnumerable<PremiumDtoResponse>>> Get()
         {
@@ -97,6 +42,34 @@ namespace API.Controllers
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PremiumDtoResponse>> GetById([FromRoute] int id)
+        {
+            try
+            {
+                var result = await _premiumAppServices.GetByIdAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("Front/GetAll")]
+        public async Task<ActionResult<IEnumerable<PremiumDtoRespWStudent>>> GetF()
+        {
+            try
+            {
+                var result = await _premiumAppServices.OnGetAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("Front/{id}")]
+        public async Task<ActionResult<PremiumDtoRespWStudent>> GetByIdF([FromRoute] int id)
         {
             try
             {

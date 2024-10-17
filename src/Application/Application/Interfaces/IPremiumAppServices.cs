@@ -1,4 +1,5 @@
 ﻿using Application.Dtos;
+using Application.Dtos.Response;
 using Domain.Models;
 
 namespace Application.Interfaces
@@ -8,8 +9,10 @@ namespace Application.Interfaces
         Task CreateAsync(PremiumDto premiumDto);
 
         Task<List<PremiumDtoResponse>> OnGetAsync();
+        Task<List<PremiumDtoRespWStudent>> OnGetAsyncWStudent();
 
         Task<PremiumDtoResponse> GetByIdAsync(int id);
+        Task<PremiumDtoRespWStudent> GetByIdAsyncWStudent(int id);
 
         Task DeleteAsync(int id);
 

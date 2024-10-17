@@ -1,4 +1,5 @@
 ﻿using Application.Dtos;
+using Application.Dtos.Response;
 using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Models;
@@ -63,6 +64,47 @@ namespace Application.Services
             }
         }
 
+
+
+
+
+
+
+        public virtual async Task<List<PremiumDtoRespWStudent>> OnGetAsyncWStudent()
+        {
+
+            var premium = await _premiumRepository.OnGetAsync();
+
+            //no validation required
+            var result = new List<PremiumDtoRespWStudent>();
+
+            foreach (var item in premium)
+            {
+                result.Add(new PremiumDtoRespWStudent { Id = item.Id, Name = item.Name, StartDate = item.StartDate, EndtDate = item.EndtDate, StudentId = item.StudentId, Student = item.Student });
+            }
+
+            return result;
+        }
+
+        public virtual async Task<PremiumDtoRespWStudent> GetByIdAsyncWStudent(int id)
+        {
+
+            try
+            {
+                ValidateID(id);
+                var entity = await _premiumRepository.GetByIdAsync(id);
+                return new PremiumDtoRespWStudent { Id = entity.Id, Name = entity.Name, StartDate = entity.StartDate, EndtDate = entity.EndtDate, StudentId = entity.StudentId , Student = entity.Student };
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+
+
+
+
         public virtual async Task DeleteAsync(int id)
         {
 
@@ -91,9 +133,13 @@ namespace Application.Services
             {
                 ValidateName(premiumDto.Name);
                 var originalPremium = await _premiumRepository.GetByIdAsync(premiumDto.Id);
-                var premium = new Premium { Id = originalPremium.Id, Name = originalPremium.Name, StartDate = originalPremium.StartDate, EndtDate = originalPremium.EndtDate, StudentId = originalPremium.StudentId };
+                //var premium = new Premium { Id = originalPremium.Id, Name = originalPremium.Name, StartDate = originalPremium.StartDate, EndtDate = originalPremium.EndtDate, StudentId = originalPremium.StudentId };
+                originalPremium.Name = premiumDto.Name;
+                originalPremium.EndtDate = premiumDto.EndtDate;
+                originalPremium.StartDate = premiumDto.StartDate;
+                originalPremium.StudentId = premiumDto.StudentId;
 
-                _premiumRepository.Update(premium);
+                _premiumRepository.Update(originalPremium);
                 await SaveChangesAsync();
 
             }
