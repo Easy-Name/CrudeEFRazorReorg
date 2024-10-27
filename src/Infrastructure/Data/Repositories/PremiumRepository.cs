@@ -1,11 +1,6 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Data.Repositories
 {
@@ -17,6 +12,14 @@ namespace Infrastructure.Data.Repositories
         {
 
         }
+
+        public async Task<List<Premium>> OnGetAsyncWithStudent()
+        {
+            return await _context.Premium.Include(p => p.Student).ToListAsync();
+        }
+
+
+
 
         /*public override async Task CreateAsync(Premium entity)
         {

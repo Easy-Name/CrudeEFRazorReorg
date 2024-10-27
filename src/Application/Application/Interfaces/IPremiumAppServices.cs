@@ -1,20 +1,24 @@
-﻿using Domain.Models;
+﻿using Application.Dtos;
+using Application.Dtos.Response;
+using Domain.Models;
 
 namespace Application.Interfaces
 {
     public interface IPremiumAppServices
     {
-        Task CreateAsync(Premium premium);
+        Task CreateAsync(PremiumDto premiumDto);
 
-        Task<List<Premium>> OnGetAsync();
+        Task<List<PremiumDtoResponse>> OnGetAsync();
+        Task<List<PremiumDtoRespWStudent>> OnGetAsyncWStudent();
 
-        Task<Premium> GetByIdAsync(int id);
+        Task<PremiumDtoResponse> GetByIdAsync(int id);
+        Task<PremiumDtoRespWStudent> GetByIdAsyncWStudent(int id);
 
-        Task DeleteAsync(Premium premium);
+        Task DeleteAsync(int id);
 
         Task SaveChangesAsync();
 
-        void Update(Premium premium);
+        Task UpdateAsync(PremiumDto premiumDto);
 
         bool Exists(int id);
     }

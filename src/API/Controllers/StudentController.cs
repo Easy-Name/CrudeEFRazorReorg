@@ -1,6 +1,5 @@
-﻿using Application.Interfaces;
-using Domain.Models;
-using Microsoft.AspNetCore.Http;
+﻿using Application.Dtos;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -19,54 +18,73 @@ namespace API.Controllers
         }
 
         [HttpGet("GetAll")]
-        public async Task<ActionResult<IEnumerable<Student>>> Get()
+        public async Task<ActionResult<IEnumerable<StudentDtoResponse>>> Get()
         {
-            var result = await _studentAppServices.OnGetAsync();
-            return Ok(result);
+            try
+            {
+                var result = await _studentAppServices.OnGetAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-
-        [HttpGet("GetById")]
-        public async Task<ActionResult<Student>> GetById(int id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<StudentDtoResponse>> GetById([FromRoute] int id)
         {
-            var result = await _studentAppServices.GetByIdAsync(id);
-            return Ok(result);
+            try
+            {
+                var result = await _studentAppServices.GetByIdAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut]
-        public ActionResult Update(Student student)
+        public async Task<ActionResult> Update(StudentDto studentDto)
         {
-            _studentAppServices.Update(student);
-            return Ok();
+            try
+            {
+                await _studentAppServices.UpdateAsync(studentDto);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-
 
         [HttpDelete]
-        public ActionResult Delete(Student student)
+        public async Task<ActionResult> Delete(int id)
         {
-            _studentAppServices.DeleteAsync(student);
-            return Ok();
+            try
+            {
+                await _studentAppServices.DeleteAsync(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-
-
-        /*[HttpPost]
-        public ActionResult Create(Premium premium)
-        {
-            _premiumAppServices.CreateAsync(premium);
-            return Ok();
-        }*/
-
         [HttpPost]
-        public ActionResult Create(string Name, DateTime StartDate, DateTime EndDate, int StudentId)
+        public async Task<ActionResult> Create(StudentDto studentDto)
         {
-
-            var student = new Student();
-            student.Name = Name;
-
-
-            _studentAppServices.CreateAsync(student);
-            return Ok();
+            try
+            {
+                await _studentAppServices.CreateAsync(studentDto);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 

@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Domain.Interfaces
 {
-    public interface IBaseRepository<TEntity> where TEntity : BaseEntity
+    public interface IBaseRepository<TEntity> 
+        where TEntity : BaseEntity
     {
         Task<List<TEntity>> OnGetAsync();
-
 
         Task<TEntity> GetByIdAsync(int id);
 

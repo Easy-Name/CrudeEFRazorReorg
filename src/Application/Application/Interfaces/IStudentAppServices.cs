@@ -1,24 +1,22 @@
-﻿using Domain.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Application.Dtos;
+using Domain.Models;
 
 namespace Application.Interfaces
 {
-    public interface IStudentAppServices
+    public interface IStudentAppServices//: IBaseAppServices<StudentDto,StudentDtoResponse, Student>
     {
 
-        Task CreateAsync(Student student);
+        Task CreateAsync(StudentDto dtoRequest);
 
-        Task<List<Student>> OnGetAsync();
+        Task<List<StudentDtoResponse>> OnGetAsync();
 
-        Task<Student> GetByIdAsync(int id);
+        Task<StudentDtoResponse> GetByIdAsync(int id);
 
-        Task DeleteAsync(Student student);
+        Task DeleteAsync(int id);
 
         Task SaveChangesAsync();
 
-        void Update(Student student);
-
-        bool Exists(int id);
+		Task UpdateAsync(StudentDto studentDto);
 
     }
 }

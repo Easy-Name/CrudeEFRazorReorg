@@ -1,73 +1,84 @@
-﻿using Application.Interfaces;
+﻿using Application.Dtos;
+using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Text.RegularExpressions;
-using NToastNotify;
 using Infrastructure.Data.Repositories;
+using System.Text.RegularExpressions;
 
-//using Microsoft.AspNetCore.Mvc.RazorPages;
-//using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Application.Services
 {
+
+
     public class StudentAppServices : IStudentAppServices
     {
 
         private readonly IStudentRepository _studentRepository;
-        private readonly IToastNotification _toastNotification; //<------------------
 
-        public StudentAppServices(IStudentRepository studentRepository, IToastNotification toastNotification)
+        public StudentAppServices(IStudentRepository studentRepository)
         {
             _studentRepository = studentRepository;
-            _toastNotification = toastNotification;
         }
 
-        public async Task CreateAsync(Student student)
+        public async Task CreateAsync(StudentDto studentDto)
         {
             try
             {
-                bool namevalidation = ValidateName(student.Name);
-                bool emailvalidation = ValidateEmail(student.Email);
-                bool idValidation = ValidateID(student.Id);
+                ValidateName(studentDto.Name);
+                ValidateEmail(studentDto.Email);
+
+                var student = new Student { Name = studentDto.Name, Email = studentDto.Email };
+
                 await _studentRepository.CreateAsync(student);
             }
-            catch (Exception ex)
+            catch 
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
+                throw;
             }
 
         }
-        public virtual async Task<List<Student>> OnGetAsync()
+        public virtual async Task<List<StudentDtoResponse>> OnGetAsync()
         {
             //no validation required
-            return await _studentRepository.OnGetAsync();
+            var students = await _studentRepository.OnGetAsync();
+            var result = new List<StudentDtoResponse>();
+
+            foreach (var item in students)
+            {
+                result.Add(new StudentDtoResponse { Id = item.Id, Name = item.Name, Email = item.Email });
+            }
+
+            return result;
+            
         }
 
-        public virtual async Task<Student> GetByIdAsync(int id)
+        public virtual async Task<StudentDtoResponse> GetByIdAsync(int id)
         {
             try
             {
-                bool validation = ValidateID(id);
-                return await _studentRepository.GetByIdAsync(id);
+                bool validation = ValidateId(id);
+                var student = await _studentRepository.GetByIdAsync(id);
+                //var studentDtoResponse = new StudentDtoResponse { Name = student.Name, Email = student.Email}
+                return new StudentDtoResponse { Id =student.Id, Name = student.Name, Email = student.Email };
             }
-            catch (Exception ex)
+            catch 
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
-                return new Student();
+
+                throw;
             }
 
         }
-        public virtual async Task DeleteAsync(Student student)
+        public virtual async Task DeleteAsync(int id)
         {
             try
             {
-                bool validation = Exists(student.Id);
+                ValidateId(id);
+                var student = await _studentRepository.GetByIdAsync(id);
                 await _studentRepository.DeleteAsync(student);
             }
-            catch (Exception ex)
+            catch 
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
+                throw;
             }
         }
 
@@ -77,43 +88,40 @@ namespace Application.Services
             await _studentRepository.SaveChangesAsync();
         }
 
-        public virtual void Update(Student student)
+        public virtual async Task UpdateAsync(StudentDto studentDto)
         {
 
             try
             {
-                bool namevalidation = ValidateName(student.Name);
-                bool emailvalidation = ValidateEmail(student.Email);
-                bool idValidation = ValidateID(student.Id);
+                ValidateName(studentDto.Name);
+				ValidateId(studentDto.Id);
+
+                Student student = new Student();
+
+                student = await _studentRepository.GetByIdAsync(studentDto.Id);
+
+                if (student.Email == studentDto.Email)
+                {
+                    student.Name = studentDto.Name;
+                }
+                else 
+                {
+                    ValidateEmail(studentDto.Email);
+                    student.Name = studentDto.Name;
+                    student.Email = studentDto.Email;
+                }
                 _studentRepository.Update(student);
+                await SaveChangesAsync();
             }
-            catch (Exception ex)
+            catch
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
+                throw;
             }
-
         }
 
-        public virtual bool Exists(int id)
+        public bool ValidateId(int id)
         {
-            bool validation = ValidateID(id);
-
-            if (!validation)
-            {
-                throw new Exception("Invalid ID");
-            }
-
-            if (!_studentRepository.Exists(id))
-            {
-                throw new Exception("ID does not exist");
-            }
-
-            return true;
-        }
-
-        public bool ValidateID(int id)
-        {
-            if (id < 0)
+            if (id <= 0)
             {
                 throw new Exception("Invalid ID");
             }
@@ -123,42 +131,48 @@ namespace Application.Services
 
         private int NameLenght = 5;
 
-        public bool ValidateName(string name)
+        public void ValidateName(string name)
         {
             string regex = @"^(?!\s*$)[A-Za-zÀ-ÖØ-öø-ÿ'’-]+(?: [A-Za-zÀ-ÖØ-öø-ÿ'’-]+)*$";
+
             if (name.Length < NameLenght)
-            {
                 throw new Exception($"Name shorter than {NameLenght} characters");
-            }
-            else if (!Regex.IsMatch(name, regex))
-            {
+
+
+            if (!Regex.IsMatch(name, regex))
                 throw new Exception($"Invalid name format");
-            }
-            return true;
+
         }
+
         public virtual bool ExistsEmail(string email)
         {
             return _studentRepository.ExistsEmail(email);
         }
 
-        public bool ValidateEmail(string email)
+        public void ValidateEmail(string email)
         {
             //string regex = @"^[^@\s]+@[^@\s]+\.(com|net|org|gov)$";
             string regex = @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$";
             var regexOk = Regex.IsMatch(email, regex, RegexOptions.IgnoreCase);
             var emailExist = ExistsEmail(email);
 
-            if (!regexOk) 
+            if (!regexOk)
             {
                 throw new Exception($"Invalid e-mail");
             }
 
-            if(emailExist)
+            if (emailExist)
             {
                 throw new Exception("E-Mail already in use");
             }
 
-            return true;
         }
     }
+
+    /*public class StudentAppServices : BaseAppServices<StudentDto, StudentDtoResponse, Student>, IStudentAppServices
+    {
+        public StudentAppServices(IStudentRepository studentRepository) : base(studentRepository)
+        {
+        }
+    }*/
 }

@@ -1,8 +1,9 @@
-﻿using Application.Interfaces;
+﻿using Application.Dtos;
+using Application.Dtos.Response;
+using Application.Interfaces;
 using Domain.Interfaces;
 using Domain.Models;
 using Infrastructure.Data.Repositories;
-using NToastNotify;
 using System.Text.RegularExpressions;
 
 namespace Application.Services
@@ -10,61 +11,112 @@ namespace Application.Services
     public class PremiumAppServices : IPremiumAppServices
     {
         private readonly IPremiumRepository _premiumRepository;
-        private readonly IToastNotification _toastNotification; //<------------------
 
-        public PremiumAppServices(IPremiumRepository premiumRepository, IToastNotification toastNotification)
+        public PremiumAppServices(IPremiumRepository premiumRepository)
         {
             _premiumRepository = premiumRepository;
-            _toastNotification = toastNotification;
         }
 
-        public async Task CreateAsync(Premium premium)
+
+        public async Task CreateAsync(PremiumDto premiumDto)
         {
 
             try
             {
-                bool namevalidation = ValidateName(premium.Name);
-                bool idValidation = ValidateID(premium.Id);
+                ValidateName(premiumDto.Name);
+                var premium = new Premium { Name = premiumDto.Name, StartDate = premiumDto.StartDate, EndtDate = premiumDto.EndtDate, StudentId = premiumDto.StudentId};
                 await _premiumRepository.CreateAsync(premium);
             }
-            catch (Exception ex)
+            catch 
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
+                throw;
             }
         }
 
-        public virtual async Task<List<Premium>> OnGetAsync()
+        public virtual async Task<List<PremiumDtoResponse>> OnGetAsync()
         {
+            
+            var premium = await _premiumRepository.OnGetAsync();
+
             //no validation required
-            return await _premiumRepository.OnGetAsync();
+            var result = new List<PremiumDtoResponse>();
+
+            foreach (var item in premium)
+            {
+                result.Add(new PremiumDtoResponse { Id = item.Id, Name = item.Name, StartDate = item.StartDate, EndtDate = item.EndtDate, StudentId = item.StudentId });
+            }
+
+            return result;
         }
 
-        public virtual async Task<Premium> GetByIdAsync(int id)
+        public virtual async Task<PremiumDtoResponse> GetByIdAsync(int id)
         {
 
             try
             {
-                bool validation = ValidateID(id);
-                return await _premiumRepository.GetByIdAsync(id);
+                ValidateID(id);
+                var entity = await _premiumRepository.GetByIdAsync(id);
+                return new PremiumDtoResponse { Id = entity.Id, Name = entity.Name, StartDate = entity.StartDate, EndtDate = entity.EndtDate, StudentId = entity.StudentId };
             }
-            catch (Exception ex)
+            catch
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
-                return new Premium();
+                throw;
             }
         }
 
-        public virtual async Task DeleteAsync(Premium premium)
+
+
+
+
+
+
+        public virtual async Task<List<PremiumDtoRespWStudent>> OnGetAsyncWStudent()
+        {
+
+            var premium = await _premiumRepository.OnGetAsync();
+
+            //no validation required
+            var result = new List<PremiumDtoRespWStudent>();
+
+            foreach (var item in premium)
+            {
+                result.Add(new PremiumDtoRespWStudent { Id = item.Id, Name = item.Name, StartDate = item.StartDate, EndtDate = item.EndtDate, StudentId = item.StudentId, Student = new StudentDtoResponse(item.Student) });
+            }
+
+            return result;
+        }
+
+        public virtual async Task<PremiumDtoRespWStudent> GetByIdAsyncWStudent(int id)
         {
 
             try
             {
-                bool validation = Exists(premium.Id);
+                ValidateID(id);
+                var entity = await _premiumRepository.GetByIdAsync(id);
+                return new PremiumDtoRespWStudent { Id = entity.Id, Name = entity.Name, StartDate = entity.StartDate, EndtDate = entity.EndtDate, StudentId = entity.StudentId , Student = new StudentDtoResponse(entity.Student) };
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+
+
+
+
+        public virtual async Task DeleteAsync(int id)
+        {
+
+            try
+            {
+                Exists(id);
+                var premium = await _premiumRepository.GetByIdAsync(id);
                 await _premiumRepository.DeleteAsync(premium);
             }
-            catch (Exception ex)
+            catch 
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
+                throw;
             }
 
         }
@@ -75,17 +127,25 @@ namespace Application.Services
             await _premiumRepository.SaveChangesAsync();
         }
 
-        public virtual void Update(Premium premium)
+        public virtual async Task UpdateAsync(PremiumDto premiumDto)
         {
             try
             {
-                bool namevalidation = ValidateName(premium.Name);
-                bool idValidation = ValidateID(premium.Id);
-                _premiumRepository.Update(premium);
+                ValidateName(premiumDto.Name);
+                var originalPremium = await _premiumRepository.GetByIdAsync(premiumDto.Id);
+                //var premium = new Premium { Id = originalPremium.Id, Name = originalPremium.Name, StartDate = originalPremium.StartDate, EndtDate = originalPremium.EndtDate, StudentId = originalPremium.StudentId };
+                originalPremium.Name = premiumDto.Name;
+                originalPremium.EndtDate = premiumDto.EndtDate;
+                originalPremium.StartDate = premiumDto.StartDate;
+                originalPremium.StudentId = premiumDto.StudentId;
+
+                _premiumRepository.Update(originalPremium);
+                await SaveChangesAsync();
+
             }
-            catch (Exception ex)
+            catch 
             {
-                _toastNotification.AddErrorToastMessage(ex.Message);
+                throw;
             }
         }
 
@@ -109,7 +169,7 @@ namespace Application.Services
 
         public bool ValidateID(int id)
         {
-            if (id < 0)
+            if (id <= 0)
             {
                 throw new Exception("Invalid ID");
             }
