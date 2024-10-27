@@ -1,5 +1,7 @@
 ﻿
 
+using Domain.Models;
+
 namespace Application.Dtos
 {
     public class StudentDtoResponse 
@@ -10,5 +12,14 @@ namespace Application.Dtos
 
         public string Email { get; set; }
 
+        public StudentDtoResponse(Student student)
+        {
+            Id = student.Id; 
+            Name = student.Name; 
+            Email = student.Email;
+        }
+        public StudentDtoResponse()
+        {
+        }
     }
 }

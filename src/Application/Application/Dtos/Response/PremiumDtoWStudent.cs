@@ -14,6 +14,7 @@ namespace Application.Dtos.Response
 
         public int StudentId { get; set; }
 
-        public Student? Student { get; set; }
-    }
+        public StudentDtoResponse Student { get; set; }
+    //public Student Student { get; set; }
+}
 }

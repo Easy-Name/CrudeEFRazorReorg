@@ -80,7 +80,7 @@ namespace Application.Services
 
             foreach (var item in premium)
             {
-                result.Add(new PremiumDtoRespWStudent { Id = item.Id, Name = item.Name, StartDate = item.StartDate, EndtDate = item.EndtDate, StudentId = item.StudentId, Student = item.Student });
+                result.Add(new PremiumDtoRespWStudent { Id = item.Id, Name = item.Name, StartDate = item.StartDate, EndtDate = item.EndtDate, StudentId = item.StudentId, Student = new StudentDtoResponse(item.Student) });
             }
 
             return result;
@@ -93,7 +93,7 @@ namespace Application.Services
             {
                 ValidateID(id);
                 var entity = await _premiumRepository.GetByIdAsync(id);
-                return new PremiumDtoRespWStudent { Id = entity.Id, Name = entity.Name, StartDate = entity.StartDate, EndtDate = entity.EndtDate, StudentId = entity.StudentId , Student = entity.Student };
+                return new PremiumDtoRespWStudent { Id = entity.Id, Name = entity.Name, StartDate = entity.StartDate, EndtDate = entity.EndtDate, StudentId = entity.StudentId , Student = new StudentDtoResponse(entity.Student) };
             }
             catch
             {

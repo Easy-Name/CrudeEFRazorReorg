@@ -14,5 +14,18 @@ namespace Application.Dtos
 
         public int StudentId { get; set; }
 
+        public PremiumDto(PremiumDtoResponse premiumDtoResp)
+        {
+            StartDate = premiumDtoResp.StartDate;
+            EndtDate = premiumDtoResp.EndtDate;
+            Id = premiumDtoResp.Id;
+            StudentId = premiumDtoResp.StudentId;
+            Name = premiumDtoResp.Name;
+        }
+
+        public PremiumDto()
+        {
+        }
+
     }
 }
